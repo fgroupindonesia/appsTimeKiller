@@ -12,6 +12,7 @@ package logic;
  */
 public class Data {
     private String type;
+    private String shutdowntime = "-";
     private int no;
     private int pid;
     private String name;
@@ -85,5 +86,19 @@ public class Data {
      */
     public void setType(String type) {
         this.type = type;
+    }
+
+    /**
+     * @return the shutdowntime
+     */
+    public String getShutdowntime() {
+        return shutdowntime;
+    }
+
+    /**
+     * @param shutdowntime the shutdowntime to set
+     */
+    public void setShutdowntime(String shutdowntime) {
+        this.shutdowntime = shutdowntime;
     }
 }

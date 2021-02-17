@@ -6,6 +6,15 @@
  */
 package frames;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+import logic.CMDExecutor;
+import logic.Data;
+import logic.UIHelper;
+
 /**
  *
  * @author ASUS
@@ -15,8 +24,21 @@ public class MainFrame extends javax.swing.JFrame {
     /**
      * Creates new form MainFrame
      */
+    ArrayList<Data> seluruhApp = null;
+
     public MainFrame() {
         initComponents();
+
+        UIHelper.setTable(jTable1);
+
+        UIHelper.centerColumn(0);
+        UIHelper.centerColumn(2);
+        UIHelper.centerColumn(3);
+        UIHelper.centerColumn(4);
+
+        UIHelper.centerHeader();
+
+        refreshData();
     }
 
     /**
@@ -31,8 +53,9 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        buttonRefresh = new javax.swing.JButton();
+        buttonSetShutdown = new javax.swing.JButton();
+        buttonKillNow = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -41,14 +64,14 @@ public class MainFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "No.", "App Name", "PID", "Memory Used"
+                "No.", "App Name", "PID", "Memory Used", "Shutdown Time"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, true
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -74,16 +97,89 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel1.setPreferredSize(new java.awt.Dimension(456, 40));
         jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        jButton1.setText("Refresh");
-        jPanel1.add(jButton1);
+        buttonRefresh.setText("Refresh");
+        buttonRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonRefreshActionPerformed(evt);
+            }
+        });
+        jPanel1.add(buttonRefresh);
 
-        jButton2.setText("Set Time");
-        jPanel1.add(jButton2);
+        buttonSetShutdown.setText("Set Time");
+        buttonSetShutdown.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonSetShutdownActionPerformed(evt);
+            }
+        });
+        jPanel1.add(buttonSetShutdown);
+
+        buttonKillNow.setText("Kill Now");
+        buttonKillNow.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonKillNowActionPerformed(evt);
+            }
+        });
+        jPanel1.add(buttonKillNow);
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.PAGE_START);
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void buttonRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonRefreshActionPerformed
+
+        refreshData();
+
+    }//GEN-LAST:event_buttonRefreshActionPerformed
+
+    private void renderTable() {
+        UIHelper.clearData();
+
+        for (Data satu : seluruhApp) {
+            UIHelper.addData(satu);
+        }
+    }
+
+    private void refreshData() {
+        seluruhApp = CMDExecutor.getAppsList();
+
+        renderTable();
+
+        UIHelper.centerColumn(0);
+        UIHelper.centerColumn(2);
+        UIHelper.centerColumn(3);
+        UIHelper.centerColumn(4);
+
+    }
+
+    private void buttonKillNowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonKillNowActionPerformed
+        int row = jTable1.getSelectedRow();
+
+        if (row != -1) {
+
+            int col = 1;
+            String nameSelected = jTable1.getValueAt(row, col).toString();
+
+            CMDExecutor.kill(nameSelected);
+            refreshData();
+        }
+    }//GEN-LAST:event_buttonKillNowActionPerformed
+
+    private void buttonSetShutdownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSetShutdownActionPerformed
+        int row = jTable1.getSelectedRow();
+
+        if (row != -1) {
+
+            ShutdownTime dialog = new ShutdownTime(this, true);
+            String nameSelected = jTable1.getValueAt(row, 1).toString();
+
+            dialog.setAppName(nameSelected);
+            dialog.setMainFrame(this);
+            dialog.setVisible(true);
+
+        }
+    }//GEN-LAST:event_buttonSetShutdownActionPerformed
 
     /**
      * @param args the command line arguments
@@ -96,19 +192,13 @@ public class MainFrame extends javax.swing.JFrame {
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
+                if ("Windows".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+
         }
         //</editor-fold>
 
@@ -121,10 +211,52 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton buttonKillNow;
+    private javax.swing.JButton buttonRefresh;
+    private javax.swing.JButton buttonSetShutdown;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
+
+    public void setAppTime(String appSelected, String hourMinute) throws Exception {
+
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateCompleteFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        Date date = new Date();
+
+        String saatIni = dateFormatter.format(date) + " " + hourMinute;
+        Date dateExecution = dateCompleteFormatter.parse(saatIni);
+
+        //Now create the time and schedule it
+        Timer timer = new Timer();
+
+        timer.schedule(new MyTimeTask(appSelected), dateExecution);
+        System.out.println("Apps " + appSelected + " akan close pada " + saatIni);
+
+        for (Data satu : seluruhApp) {
+            if (satu.getName().equalsIgnoreCase(appSelected)) {
+                satu.setShutdowntime(hourMinute);
+            }
+        }
+
+        renderTable();
+    }
+
+    private class MyTimeTask extends TimerTask {
+
+        public MyTimeTask(String appName) {
+            targetName = appName;
+        }
+
+        String targetName;
+        int targetPID;
+
+        public void run() {
+            CMDExecutor.kill(targetName);
+            refreshData();
+        }
+    }
+
 }
