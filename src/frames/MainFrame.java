@@ -6,6 +6,8 @@
  */
 package frames;
 
+import java.awt.AWTException;
+import java.awt.Frame;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,6 +16,18 @@ import java.util.TimerTask;
 import logic.CMDExecutor;
 import logic.Data;
 import logic.UIHelper;
+import java.awt.Image;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
+import javax.swing.SwingConstants;
 
 /**
  *
@@ -21,6 +35,52 @@ import logic.UIHelper;
  */
 public class MainFrame extends javax.swing.JFrame {
 
+    SystemTray tray = SystemTray.getSystemTray();
+    Toolkit toolkit = Toolkit.getDefaultToolkit();
+    TrayIcon trayIcon = null;
+
+    private void makeTray() {
+
+        if (!SystemTray.isSupported()) {
+            System.out.println("SystemTray is not supported");
+            return;
+        }
+
+        Image image = toolkit.getImage("timer.jpg");
+
+        PopupMenu menu = new PopupMenu();
+
+        MenuItem messageItem = new MenuItem("Show Frame");
+        messageItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                MainFrame.this.setExtendedState(JFrame.NORMAL);
+            }
+        });
+        menu.add(messageItem);
+
+        MenuItem closeItem = new MenuItem("Close");
+        closeItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+        menu.add(closeItem);
+        trayIcon = new TrayIcon(image, "Apps Time Killer", menu);
+        trayIcon.setImageAutoSize(true);
+
+        try {
+            tray.add(trayIcon);
+
+        } catch (AWTException ex) {
+            System.out.println("Tray is unsupported!");
+        }
+
+    }
+
+    private void removeTray(){
+        tray.remove(trayIcon);
+    }
+    
     /**
      * Creates new form MainFrame
      */
@@ -39,6 +99,7 @@ public class MainFrame extends javax.swing.JFrame {
         UIHelper.centerHeader();
 
         refreshData();
+
     }
 
     /**
@@ -58,6 +119,11 @@ public class MainFrame extends javax.swing.JFrame {
         buttonKillNow = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowStateListener(new java.awt.event.WindowStateListener() {
+            public void windowStateChanged(java.awt.event.WindowEvent evt) {
+                formWindowStateChanged(evt);
+            }
+        });
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -180,6 +246,17 @@ public class MainFrame extends javax.swing.JFrame {
 
         }
     }//GEN-LAST:event_buttonSetShutdownActionPerformed
+
+    private void formWindowStateChanged(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowStateChanged
+
+        if ((evt.getNewState() & JFrame.ICONIFIED) == JFrame.ICONIFIED) {
+            makeTray();
+        } else if ((evt.getNewState() & JFrame.NORMAL) == JFrame.NORMAL) {
+            //remoteTray();
+            removeTray();
+        }
+
+    }//GEN-LAST:event_formWindowStateChanged
 
     /**
      * @param args the command line arguments
