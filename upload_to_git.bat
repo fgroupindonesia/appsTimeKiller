@@ -1,4 +1,4 @@
 git add .
-git commit -m "Now it has Tray feature!"
+git commit -m "ImageExtractor for helping tray icon."
 git push origin main
 git gc --prune
