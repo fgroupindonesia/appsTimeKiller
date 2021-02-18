@@ -6,6 +6,8 @@
  */
 package frames;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import logic.UIHelper;
 
 /**
@@ -15,19 +17,19 @@ import logic.UIHelper;
 public class ShutdownTime extends javax.swing.JDialog {
 
     int hour;
-    int minute=45;
+    int minute = 45;
     String hourMinute = null;
     String appName = null;
 
     MainFrame mainFrameRef;
-    
-    public void setMainFrame(MainFrame ref){
+
+    public void setMainFrame(MainFrame ref) {
         mainFrameRef = ref;
     }
-    
+
     public void setAppName(String labelAppName) {
         appName = labelAppName;
-        labelWhatTime.setText("What time is this <html><b>" + labelAppName + " app</b></html> will be terminated!");
+        labelWhatTime.setText("<html>What time is this <b>" + labelAppName + " app</b> will be terminated ??</html> ");
     }
 
     /**
@@ -36,6 +38,20 @@ public class ShutdownTime extends javax.swing.JDialog {
     public ShutdownTime(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+
+        showTimeNow();
+    }
+
+    private void showTimeNow() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        Date now = new Date();
+        hourMinute = sdf.format(now);
+
+        String dataHour[] = hourMinute.split(":");
+        hour = Integer.parseInt(dataHour[0]);
+        minute = Integer.parseInt(dataHour[1]);
+
+        labelTime.setText(hourMinute);
     }
 
     /**
@@ -58,6 +74,7 @@ public class ShutdownTime extends javax.swing.JDialog {
         buttonOK = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(450, 360));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         labelWhatTime.setText("What Time do you want this app XXXX will be killed?");
@@ -119,8 +136,13 @@ public class ShutdownTime extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void buttonHourUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonHourUpActionPerformed
-        hour++;
-        refreshTime();
+        if (hour < 23) {
+            hour++;
+            refreshTime();
+        }else if(hour==23){
+            hour = 0;
+            refreshTime();
+        }
     }//GEN-LAST:event_buttonHourUpActionPerformed
 
     private void refreshTime() {
@@ -139,8 +161,13 @@ public class ShutdownTime extends javax.swing.JDialog {
     }//GEN-LAST:event_buttonHourDownActionPerformed
 
     private void buttonMinuteUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonMinuteUpActionPerformed
-        minute++;
-        refreshTime();
+        if (minute < 59) {
+            minute++;
+            refreshTime();
+        }else if(minute==59){
+            minute = 0;
+            refreshTime();
+        }
     }//GEN-LAST:event_buttonMinuteUpActionPerformed
 
     private void buttonMinuteDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonMinuteDownActionPerformed
@@ -151,14 +178,14 @@ public class ShutdownTime extends javax.swing.JDialog {
     }//GEN-LAST:event_buttonMinuteDownActionPerformed
 
     private void buttonOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOKActionPerformed
-        
-        try{
-        mainFrameRef.setAppTime(appName, hourMinute);
-        } catch(Exception ex){
+
+        try {
+            mainFrameRef.setAppTime(appName, hourMinute);
+        } catch (Exception ex) {
             System.out.println("Error " + ex.getMessage());
             ex.printStackTrace();
         }
-        
+
         this.dispose();
     }//GEN-LAST:event_buttonOKActionPerformed
 

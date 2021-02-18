@@ -7,7 +7,6 @@
 package frames;
 
 import java.awt.AWTException;
-import java.awt.Frame;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,10 +23,12 @@ import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.SwingConstants;
+import javax.swing.JOptionPane;
+import javax.swing.table.TableColumn;
+import logic.ImageExtractor;
+import logic.CustomColorRenderer;
 
 /**
  *
@@ -46,7 +47,8 @@ public class MainFrame extends javax.swing.JFrame {
             return;
         }
 
-        Image image = toolkit.getImage("timer.jpg");
+        //Image image = toolkit.getImage("timer.jpg");
+        Image image = toolkit.getImage(ImageExtractor.getImageLocation());
 
         PopupMenu menu = new PopupMenu();
 
@@ -77,10 +79,10 @@ public class MainFrame extends javax.swing.JFrame {
 
     }
 
-    private void removeTray(){
+    private void removeTray() {
         tray.remove(trayIcon);
     }
-    
+
     /**
      * Creates new form MainFrame
      */
@@ -100,6 +102,24 @@ public class MainFrame extends javax.swing.JFrame {
 
         refreshData();
 
+        ImageExtractor.extractFile("timer.png");
+        applyFrameIcon();
+        applyCustomTable();
+    }
+
+    private void applyCustomTable() {
+        CustomColorRenderer colorRenderer = new CustomColorRenderer();
+        int manyCols = jTable1.getColumnModel().getColumnCount();
+
+        for (int i = 0; i < manyCols; i++) {
+            TableColumn tColumn = jTable1.getColumnModel().getColumn(i);
+            tColumn.setCellRenderer(colorRenderer);
+        }
+    }
+
+    private void applyFrameIcon() {
+        ImageIcon img = new ImageIcon(ImageExtractor.getImageLocation());
+        this.setIconImage(img.getImage());
     }
 
     /**
@@ -114,11 +134,15 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
+        buttonInfo = new javax.swing.JButton();
         buttonRefresh = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
         buttonSetShutdown = new javax.swing.JButton();
         buttonKillNow = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Apps Time Killer");
+        setResizable(false);
         addWindowStateListener(new java.awt.event.WindowStateListener() {
             public void windowStateChanged(java.awt.event.WindowEvent evt) {
                 formWindowStateChanged(evt);
@@ -130,14 +154,14 @@ public class MainFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "No.", "App Name", "PID", "Memory Used", "Shutdown Time"
+                "No.", "App Name", "PID", "Memory Used", "Shutdown Time", "Type"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, true
+                false, false, false, false, true, true
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -156,20 +180,34 @@ public class MainFrame extends javax.swing.JFrame {
             jTable1.getColumnModel().getColumn(1).setResizable(false);
             jTable1.getColumnModel().getColumn(2).setResizable(false);
             jTable1.getColumnModel().getColumn(3).setResizable(false);
+            jTable1.getColumnModel().getColumn(5).setMinWidth(0);
+            jTable1.getColumnModel().getColumn(5).setPreferredWidth(0);
+            jTable1.getColumnModel().getColumn(5).setMaxWidth(0);
         }
 
         getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
-        jPanel1.setPreferredSize(new java.awt.Dimension(456, 40));
+        jPanel1.setPreferredSize(new java.awt.Dimension(456, 50));
         jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        buttonRefresh.setText("Refresh");
+        buttonInfo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/info.png"))); // NOI18N
+        buttonInfo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonInfoActionPerformed(evt);
+            }
+        });
+        jPanel1.add(buttonInfo);
+
+        buttonRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh.png"))); // NOI18N
         buttonRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonRefreshActionPerformed(evt);
             }
         });
         jPanel1.add(buttonRefresh);
+
+        jLabel1.setText("Select any program below and...");
+        jPanel1.add(jLabel1);
 
         buttonSetShutdown.setText("Set Time");
         buttonSetShutdown.addActionListener(new java.awt.event.ActionListener() {
@@ -217,6 +255,7 @@ public class MainFrame extends javax.swing.JFrame {
         UIHelper.centerColumn(3);
         UIHelper.centerColumn(4);
 
+        applyCustomTable();
     }
 
     private void buttonKillNowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonKillNowActionPerformed
@@ -226,9 +265,16 @@ public class MainFrame extends javax.swing.JFrame {
 
             int col = 1;
             String nameSelected = jTable1.getValueAt(row, col).toString();
+            String typeSelected = jTable1.getValueAt(row, 5).toString();
 
-            CMDExecutor.kill(nameSelected);
-            refreshData();
+            if (typeSelected.equalsIgnoreCase("services")) {
+                JOptionPane.showMessageDialog(this, "Service type app unable to be killed!", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+
+                CMDExecutor.kill(nameSelected);
+                refreshData();
+
+            }
         }
     }//GEN-LAST:event_buttonKillNowActionPerformed
 
@@ -239,10 +285,17 @@ public class MainFrame extends javax.swing.JFrame {
 
             ShutdownTime dialog = new ShutdownTime(this, true);
             String nameSelected = jTable1.getValueAt(row, 1).toString();
+            String typeSelected = jTable1.getValueAt(row, 5).toString();
 
-            dialog.setAppName(nameSelected);
-            dialog.setMainFrame(this);
-            dialog.setVisible(true);
+            if (typeSelected.equalsIgnoreCase("services")) {
+                JOptionPane.showMessageDialog(this, "Service type app unable to be killed!", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+
+                dialog.setAppName(nameSelected);
+                dialog.setMainFrame(this);
+                dialog.setVisible(true);
+
+            }
 
         }
     }//GEN-LAST:event_buttonSetShutdownActionPerformed
@@ -257,6 +310,10 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
     }//GEN-LAST:event_formWindowStateChanged
+
+    private void buttonInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonInfoActionPerformed
+        JOptionPane.showMessageDialog(this, "AppsTimeKiller for killing any desktop program by time, designed by FGroupIndonesia.com", "About", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_buttonInfoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -288,9 +345,11 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton buttonInfo;
     private javax.swing.JButton buttonKillNow;
     private javax.swing.JButton buttonRefresh;
     private javax.swing.JButton buttonSetShutdown;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;

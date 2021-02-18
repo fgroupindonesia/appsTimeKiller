@@ -16,13 +16,22 @@ import java.io.InputStream;
  */
 public class ImageExtractor {
 
+    public static String logoName = "timer.png";
+    public static String appName = "appstimekiller";
+
     /*public static void main(String[] args) {
         extractFile("timer.jpg");
     }*/
+    public static String getImageLocation() {
 
-    private static void extractFile(String name) {
+        File fileImage = new File(System.getenv("APPDATA"), appName + File.separator + logoName);
+        return fileImage.getAbsolutePath();
+
+    }
+
+    public static void extractFile(String name) {
         try {
-            File dirTarget = new File(System.getenv("APPDATA") + "\\appstimekiller");
+            File dirTarget = new File(System.getenv("APPDATA") + File.separator + appName);
 
             dirTarget.mkdirs();
 
@@ -33,7 +42,7 @@ public class ImageExtractor {
 
             FileOutputStream out = new FileOutputStream(target);
             ClassLoader cl = ClassLoader.getSystemClassLoader();
-            InputStream in = cl.getSystemResourceAsStream("images/timer.jpg");
+            InputStream in = cl.getSystemResourceAsStream("images" + File.separator + logoName);
 
             byte[] buf = new byte[8 * 1024];
             int len;

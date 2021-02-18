@@ -18,7 +18,7 @@ public class CMDExecutor {
 
     public static void main(String[] args) {
         getAppsList();
-        kill("cmd.exe");
+        //kill("cmd.exe");
     }
 
     private static boolean killExecutor(String ... command){
