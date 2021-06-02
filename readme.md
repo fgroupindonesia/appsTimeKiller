@@ -1,4 +1,4 @@
-# PREVIEW
+# APPS TIME KILLER
 
 ### Main Program :
 ![Preview01](images/preview_apps_time_killer.png)

@@ -1,4 +1,4 @@
 git add .
-git commit -m "absolute layout bugs fixed!"
+git commit -m "adding preview images and some readme!"
 git push origin main
 git gc --prune
